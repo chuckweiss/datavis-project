@@ -1,7 +1,8 @@
 from os import walk, path
 
+
 def parseProjectData(pathname):
-    def list_files(dirpath, files = []):
+    def list_files(dirpath, files=[]):
         for (curdir, dirs, filenames) in walk(dirpath):
             for file in filenames:
                 files.append((file, curdir))
