@@ -2,10 +2,8 @@ from tkinter import *
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 
-import pandas as pd
-
-def csv_dataframe(filename):
-    return pd.read_csv(filename)
+from buildDataFrames import buildDataFrames
+from parseProjectData import parseProjectData
 
 def select_file():
     filetypes = (
@@ -13,14 +11,11 @@ def select_file():
         ('All files', '*.*')
     )
 
-    filename = fd.askopenfilename(
-        title='Open a file',
-        initialdir='/',
-        filetypes=filetypes)
+    dirname = fd.askdirectory()
 
-    df = csv_dataframe(filename)
+    parsed_data = parseProjectData(dirname)
 
-    print(df)
+    print(buildDataFrames(parsed_data))
 
     # showinfo(title="Selected File", message=df.head(-1))
 
