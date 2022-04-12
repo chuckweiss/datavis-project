@@ -1,23 +1,15 @@
 from tkinter import *
 from tkinter import filedialog as fd
-from tkinter.messagebox import showinfo
 
 from buildDataFrames import buildDataFrames
 from parseProjectData import parseProjectData
 
 def select_file():
-    filetypes = (
-        ('text files', '*.csv'),
-        ('All files', '*.*')
-    )
-
     dirname = fd.askdirectory()
 
     parsed_data = parseProjectData(dirname)
 
     print(buildDataFrames(parsed_data))
-
-    # showinfo(title="Selected File", message=df.head(-1))
 
     
    
