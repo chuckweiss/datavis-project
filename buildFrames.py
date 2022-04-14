@@ -5,11 +5,17 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # NavigationToolbar2Tk
 from tkinter import Frame, Button, Canvas, Menu
 from matplotlib.figure import Figure
+from matplotlib.widgets import SpanSelector
 # matplotlib.use("TkAgg")
 plt.tight_layout()
+matplotlib.pyplot.ion()
 
 
 def buildFrames(root, tkframes, dataframes):
+    axes = {}
+    cans = {}
+    spans = []
+
     for subject_id in tkframes:
         df = dataframes[subject_id]
         df = df.truncate(after=100)  # make faster, needs fix tho
@@ -20,11 +26,34 @@ def buildFrames(root, tkframes, dataframes):
 
         topfig = Figure(figsize=(10, 1))
         topax = topfig.subplots()
-        topax.set_title("All data")
+
+        axes[subject_id] = []  # [topax]
 
         topcanvas = FigureCanvasTkAgg(topfig, topframe)
         topcanvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         topcanvas.draw()
+
+        cans[subject_id] = [topcanvas]
+
+        def span_select(xmin, xmax):
+            indmin = round(xmin)
+            indmax = round(xmax)
+            for ax in axes[subject_id]:
+                ax.set_xlim(indmin, indmax)
+            for canvas in cans[subject_id]:
+                canvas.draw_idle()
+
+        span = SpanSelector(
+            topax,
+            span_select,
+            "horizontal",
+            useblit=True,
+            props=dict(alpha=0.5, facecolor="tab:blue"),
+            interactive=True,
+            drag_from_anywhere=True
+        )
+
+        spans.append(span)
 
         for col, color in (
             [("Acc magnitude avg", "b"),
@@ -53,12 +82,15 @@ def buildFrames(root, tkframes, dataframes):
 
             fig = Figure(figsize=(10, 1))
             ax = fig.subplots()
+
+            axes[subject_id].append(ax)
+
             ax.plot(data, color=color)
-            ax.set_title(col)
             topax.plot(data, color=color)
 
-            f = Frame(frame)
-            f.pack()
-            canvas = FigureCanvasTkAgg(fig, f)
+            canvas = FigureCanvasTkAgg(fig, frame)
+            cans[subject_id].append(canvas)
             canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
             canvas.draw()
+
+    return spans

@@ -3,11 +3,13 @@ from dataSelect import dataSelect
 from subjectSelect import subjectSelect
 from buildFrames import buildFrames
 
+data = []
+
 
 def handle_data(root, menubar):
     dataframes = dataSelect()
     tkframes = subjectSelect(root, menubar, dataframes)
-    buildFrames(root, tkframes, dataframes)
+    data.append(buildFrames(root, tkframes, dataframes))
 
 
 def build_root():
