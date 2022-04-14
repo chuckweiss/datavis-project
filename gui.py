@@ -18,24 +18,21 @@ from matplotlib.backends.backend_tkagg import (
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 
-def select_file(figure, canvas, ax, x_vals):
+def select_file(figure, ax):
     dirname = fd.askdirectory()
     parsed_data = parseProjectData(dirname)
     folder_name = os.path.basename(dirname)
     dataframes = buildDataFrames(parsed_data)
-    df = dataframes["310"]    
-    df_vals = df.index.values
+    global df
+    df = dataframes["310"]
     # filter out on wrist
     plot_count = 1
     # for subject_id in dataframes:
     #     df = dataframes[subject_id]
     
-    
     df.set_index("Datetime (UTC)", inplace=True)
 
-
     line, = ax[1].plot(df["Acc magnitude avg"], color='b')
-    x_vals = line.get_xvals()
     ax[0].plot(df["Acc magnitude avg"], color='b')
     ax[1].xaxis.set_major_locator(plt.MaxNLocator(4))
     ax[1].set_title("Acc magnitude avg")
@@ -82,20 +79,13 @@ def select_file(figure, canvas, ax, x_vals):
 
 
 def onselect(xmin, xmax):
-    print(x_vals)
-    # print(xmin)
-    # print(xmax)
-    # indmin = ax[1].
-    # indmax = min(len(x) - 1, indmax)
-
-    # region_x = x[indmin:indmax]
-    # region_y = y[indmin:indmax]
-
-    # if len(region_x) >= 2:
-    #     line2.set_data(region_x, region_y)
-    #     ax2.set_xlim(region_x[0], region_x[-1])
-    #     ax2.set_ylim(region_y.min(), region_y.max())
-    #     fig.canvas.draw_idle()
+    indmin = round(xmin)
+    indmax = round(xmax)
+    ax[1].set_xlim(indmin, indmax)
+    ax[2].set_xlim(indmin, indmax)
+    ax[3].set_xlim(indmin, indmax)
+    ax[4].set_xlim(indmin, indmax)
+    figure.canvas.draw_idle()
         
 
 def desc_popup():
@@ -126,8 +116,7 @@ figure = Figure(figsize=(20, 7), dpi=100)
 canvas = FigureCanvasTkAgg(figure, root)
 ax = figure.subplots(5, 1)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-x_vals = []
-filemenu.add_command(label="Open", command=lambda: select_file(figure, canvas, ax, x_vals))
+filemenu.add_command(label="Open", command=lambda: select_file(figure, ax))
 
 axes1 = figure.add_axes([0.905, 0.113, 0.1, 0.075])
 b1 = plt.Button(axes1, label='Description', color="yellow")
@@ -164,7 +153,7 @@ span = SpanSelector(
         useblit=True,
         props=dict(alpha=0.5, facecolor="tab:blue"),
         interactive=True,
-        drag_from_anywhere=True
+        drag_from_anywhere=True,
     )
 
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
