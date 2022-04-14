@@ -1,0 +1,31 @@
+from tkinter import *
+from dataSelect import dataSelect
+from subjectSelect import subjectSelect
+from buildPlots import buildPlots
+from buildFrames import buildFrames
+
+
+def handle_data(root, menubar):
+    dataframes = dataSelect()
+    tkframes = subjectSelect(root, menubar, dataframes)
+    buildFrames(root, tkframes, dataframes)
+
+
+def build_root():
+    return Tk()
+
+
+root = build_root()
+
+menubar = Menu(root)
+filemenu = Menu(menubar, tearoff=0)
+
+menubar.add_cascade(label="File", menu=filemenu)
+filemenu.add_command(label="Open", command=lambda: handle_data(root, menubar))
+
+menubar.add_cascade(label="Subject")
+
+root.config(menu=menubar)
+root.geometry("1500x800")
+root.eval('tk::PlaceWindow . center')
+root.mainloop()
