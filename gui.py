@@ -88,23 +88,45 @@ def onselect(xmin, xmax):
     figure.canvas.draw_idle()
         
 
-def desc_popup():
+def desc_popup(title, df_counts):
     top=Toplevel(root)
     top.geometry("750x250")
-    top.title("Description")
-    Label(top, text= "Hello World!", font=('Mistral 18 bold')).place(x=150,y=80)
+    top.title(title)
+    fig = Figure(figsize = (5, 5), dpi = 100)
+    plot1 = fig.add_subplot()
+    plot1.plot(df_counts)
+
+    #Label(top, text= "Hello World!", font=('Mistral 18 bold')).place(x=150,y=80)
+
+    cnvas = FigureCanvasTkAgg(fig, master = top)  
+    cnvas.draw()
+  
+    # placing the canvas on the Tkinter window
+    cnvas.get_tk_widget().pack()
+  
+    # creating the Matplotlib toolbar
+    toolbar = NavigationToolbar2Tk(canvas, top)
+    toolbar.update()
+  
+    # placing the toolbar on the Tkinter window
+    cnvas.get_tk_widget().pack()
 
 
 def description1(val):
-    desc_popup()
+    mi = df["Movement intensity"].value_counts()
+    desc_popup("Movement intensity", df["Movement intensity"].value_counts(sort=True))
 
 
 def description2(val):
-    desc_popup()
+    desc_popup("Temp avg", df["Temp avg"].value_counts(sort=True))
 
 
 def description3(val):
-    desc_popup()
+    desc_popup("Eda avg", df["Eda avg"].value_counts(sort=True))
+
+
+def description4(val):
+    desc_popup("Acc magnitude avg", df["Acc magnitude avg"].value_counts(sort=True))
 
 
 root = Tk()
@@ -118,7 +140,7 @@ ax = figure.subplots(5, 1)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 filemenu.add_command(label="Open", command=lambda: select_file(figure, ax))
 
-axes1 = figure.add_axes([0.905, 0.113, 0.1, 0.075])
+axes1 = figure.add_axes([0.905, 0.113, 0.1, 0.075]) #Movement intensity
 b1 = plt.Button(axes1, label='Description', color="yellow")
 b1.on_clicked(description1)
 b1.ax.patch.set_visible(False)
@@ -141,7 +163,7 @@ b3.ax.axis('off')
 
 axes4 = figure.add_axes([0.905, 0.632, 0.1, 0.075])
 b4 = plt.Button(axes4, label='Description', color="yellow")
-b4.on_clicked(description3)
+b4.on_clicked(description4)
 b4.ax.patch.set_visible(False)
 b4.label.set_visible(False)
 b4.ax.axis('off')
