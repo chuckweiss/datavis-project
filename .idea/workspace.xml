@@ -19,9 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b74718e9-aa99-45f3-92ac-62221c4ad382" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
-    </list>
+    <list default="true" id="b74718e9-aa99-45f3-92ac-62221c4ad382" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,6 +86,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="1260" y="183" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1649810654101">
