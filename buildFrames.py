@@ -35,7 +35,7 @@ def buildFrames(root, tkframes, dataframes):
 
         cans[subject_id] = [topcanvas]
 
-        def span_select(xmin, xmax):
+        def span_select(xmin, xmax, subject_id):
             indmin = round(xmin)
             indmax = round(xmax)
             for ax in axes[subject_id]:
@@ -45,7 +45,8 @@ def buildFrames(root, tkframes, dataframes):
 
         span = SpanSelector(
             topax,
-            span_select,
+            lambda xmin, xmax, subject_id=subject_id: span_select(
+                xmin, xmax, subject_id),
             "horizontal",
             useblit=True,
             props=dict(alpha=0.5, facecolor="tab:blue"),
