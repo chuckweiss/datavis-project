@@ -1,7 +1,6 @@
 from tkinter import *
 from dataSelect import dataSelect
 from subjectSelect import subjectSelect
-from buildPlots import buildPlots
 from buildFrames import buildFrames
 
 
@@ -27,5 +26,4 @@ menubar.add_cascade(label="Subject")
 
 root.config(menu=menubar)
 root.geometry("1500x800")
-root.eval('tk::PlaceWindow . center')
 root.mainloop()
