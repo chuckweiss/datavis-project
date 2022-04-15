@@ -7,12 +7,9 @@ def create_plot(top, df, col):
     frame = Frame(top, pady=1, padx=1)
     frame.pack(side="left")
 
-    fig = Figure()
-    # fig.tight_layout(rect=[0, 0, .8, 1])
+    fig = Figure(layout='tight')
 
     ax = fig.subplots()
-    # ax.autoscale()
-
     ax.hist(df[col], bins=12)
     ax.set_title("Density vs. " + col)
 

@@ -1,18 +1,11 @@
-from distutils.command.build import build
-from turtle import width
 import pandas as pd
-from re import sub
 import tkinter as tk
 import matplotlib
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from tkinter import Frame, Button, Canvas, Menu, Label
+from tkinter import Frame, Menu, Label
 from matplotlib.figure import Figure
 from matplotlib.widgets import SpanSelector
 from buildDescription import buildDescription
-# matplotlib.use("TkAgg")
-plt.tight_layout()
-matplotlib.pyplot.ion()
 
 
 def do_popup(event, m):
@@ -60,10 +53,14 @@ def setup_aggregation(df, col, ax, canvas, menu, color):
 def setup_top(f):
     frame = Frame(f, height=1)
     frame.pack(expand=True)
-    frame.place(relheight=0.2, relwidth=1, rely=0)
+    frame.place(relheight=0.1, relwidth=1, rely=0)
 
-    fig = Figure()
+    fig = Figure(layout='tight')
     ax = fig.subplots()
+
+    ax.xaxis.set_ticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
 
     Label(frame, text="Viewfinder", width=20, height=5).pack(side="left")
 
@@ -79,7 +76,7 @@ def plot_data(root, topframe, axes, cans, df):
 
     cans.append(topcanvas)
 
-    pos = 0.2
+    pos = 0.1
 
     for col, color in (
         [("Acc magnitude avg", "b"),
@@ -90,10 +87,11 @@ def plot_data(root, topframe, axes, cans, df):
 
         frame = Frame(topframe, pady=1)
         frame.pack(expand=True)
-        frame.place(relheight=0.2, relwidth=1, rely=pos)
-        pos += 0.2
+        frame.place(relheight=(0.9 / 4), relwidth=1, rely=pos)
 
-        fig = Figure()
+        pos += (0.9 / 4)
+
+        fig = Figure(layout='tight')
         ax = fig.subplots()
         axes.append(ax)
 
