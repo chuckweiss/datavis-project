@@ -1,21 +1,42 @@
+from locale import normalize
 from tkinter import Toplevel, Entry, END, Frame
+import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 def create_plot(top, df, col):
     frame = Frame(top, pady=1, padx=1)
-    frame.pack(side="left")
+    frame.pack()
+    frame.place(relheight=0.5)
 
     fig = Figure(layout='tight')
 
     ax = fig.subplots()
-    ax.hist(df[col], bins=12)
-    ax.set_title("Density vs. " + col)
+    ax.hist(df[col], bins=25, density=True, stacked=False)
+
+    ax.set_title("Probability Density vs. " + col)
 
     canvas = FigureCanvasTkAgg(fig, frame)
     canvas.get_tk_widget().pack(side='left', fill='both', expand=1)
-    # canvas.draw()
+
+    ###
+
+    df = df.groupby(df.index.hour).mean()
+
+    frame = Frame(top, pady=1, padx=1)
+    frame.pack()
+    frame.place(relheight=0.5, rely=0.5)
+
+    fig = Figure(layout='tight')
+
+    ax = fig.subplots()
+    ax.bar(df.index, height=df[col])
+
+    ax.set_title(col + " vs. Hour of the Day")
+
+    canvas = FigureCanvasTkAgg(fig, frame)
+    canvas.get_tk_widget().pack(side='left', fill='both', expand=1)
 
 
 def display_desc(top, df, col):
@@ -23,15 +44,15 @@ def display_desc(top, df, col):
     desc = df.describe(
         percentiles=[.025, .25, .5, .75, .975, .999], datetime_is_numeric=True)
 
-    create_plot(top, df, col)
-
     desc = desc.T
     desc["skew"] = df.skew(axis=0)[0]
     desc["kurt"] = df.kurt(axis=0)[0]
     desc = desc.T
 
     frame = Frame(top)
-    frame.pack(side='right', expand=True)
+    frame.pack(side='right', expand=False)
+
+    create_plot(top, df, col)
 
     e = Entry(frame, width=20, fg='black')
     e.grid(row=0, column=1)

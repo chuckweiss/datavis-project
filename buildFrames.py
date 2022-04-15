@@ -99,7 +99,7 @@ def plot_data(root, topframe, axes, cans, df):
         ax.set_xlim(df.index[0], df.index[-1])
 
         ax.plot(data, color=color)
-        topax.plot(data, color=color)
+        topax.plot(data, color=color, alpha=0.5)
 
         title = Label(frame, text=col, width=20, height=5)
         title.pack(side="left")
