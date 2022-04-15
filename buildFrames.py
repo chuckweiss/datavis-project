@@ -134,8 +134,16 @@ def buildFrames(root, tkframes, dataframes):
         if df.empty:
             continue
 
-        df["Datetime (UTC)"] = pd.to_datetime(df["Datetime (UTC)"], utc=True)
+        df["Datetime (UTC)"] = pd.to_datetime(
+            df["Datetime (UTC)"], utc=True, infer_datetime_format=True)
 
+        df["Datetime (Local)"] = df["Datetime (UTC)"] + \
+            pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+
+        # Set index to Datetime in UTC. We need to make a menu item in the top menu
+        # next to Subject called Timezone, that will let you switch b/t UTC and Local
+        # I think it'll be very similar to the aggregation, but you give it
+        # all the axes and canvas' and have it redraw with df index set to Local
         df = df.set_index("Datetime (UTC)", inplace=False)
 
         df = df[~df.index.duplicated(keep='first')]
