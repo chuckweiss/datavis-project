@@ -11,7 +11,9 @@ def subjectSelect(root, menubar, dataframes):
     for subject_id in dataframes:
         frame = Frame(root)
         tkframes[subject_id] = frame
-        frame.grid(row=0, column=0, sticky="nsew")
+        # frame.grid(row=0, column=0, sticky="nsew")
+        frame.pack(fill="both", expand=True)
+        frame.place(relx=0, rely=0, relheight=1, relwidth=1)
 
         filemenu.add_command(
             label=subject_id,

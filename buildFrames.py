@@ -1,30 +1,28 @@
+from distutils.command.build import build
+from turtle import width
 import pandas as pd
 from re import sub
 import tkinter as tk
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # NavigationToolbar2Tk
-from tkinter import Frame, Button, Canvas, Menu
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import Frame, Button, Canvas, Menu, Label
 from matplotlib.figure import Figure
 from matplotlib.widgets import SpanSelector
+from buildDescription import buildDescription
 # matplotlib.use("TkAgg")
 plt.tight_layout()
 matplotlib.pyplot.ion()
 
 
-def plot_data(frame, axes, cans, df):
-    topframe = Frame(frame)
-    topframe.pack(expand=True)
+def do_popup(event, m):
+    try:
+        m.tk_popup(event.x_root, event.y_root)
+    finally:
+        m.grab_release()
 
-    topfig = Figure(figsize=(10, 1))
-    topax = topfig.subplots()
 
-    topcanvas = FigureCanvasTkAgg(topfig, topframe)
-    topcanvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-    topcanvas.draw()
-
-    cans.append(topcanvas)
-
+def setup_span(ax, axes, cans):
     def span_select(xmin, xmax):
         indmin = xmin
         indmax = xmax
@@ -33,8 +31,8 @@ def plot_data(frame, axes, cans, df):
         for canvas in cans:
             canvas.draw_idle()
 
-    span = SpanSelector(
-        topax,
+    return SpanSelector(
+        ax,
         span_select,
         "horizontal",
         useblit=True,
@@ -43,7 +41,45 @@ def plot_data(frame, axes, cans, df):
         drag_from_anywhere=True
     )
 
-    # spans.append(span)
+
+def setup_aggregation(df, col, ax, canvas, menu, color):
+    def sample_dataframe(sample):
+        df2 = df.resample(sample).mean()
+        data = df2[col]
+
+        ax.clear()
+        ax.plot(data, color=color)
+
+        canvas.draw_idle()
+
+    for sample in ('1min', '15min', '30min', '1H', '2H', '4H', '1d', '1w'):
+        menu.add_command(
+            label=sample, command=lambda sample=sample: sample_dataframe(sample))
+
+
+def setup_top(f):
+    frame = Frame(f, height=1)
+    frame.pack(expand=True)
+    frame.place(relheight=0.2, relwidth=1, rely=0)
+
+    fig = Figure()
+    ax = fig.subplots()
+
+    Label(frame, text="Viewfinder", width=20, height=5).pack(side="left")
+
+    canvas = FigureCanvasTkAgg(fig, frame)
+    canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+    canvas.draw()
+
+    return (ax, canvas)
+
+
+def plot_data(root, topframe, axes, cans, df):
+    (topax, topcanvas) = setup_top(topframe)
+
+    cans.append(topcanvas)
+
+    pos = 0.2
 
     for col, color in (
         [("Acc magnitude avg", "b"),
@@ -52,27 +88,13 @@ def plot_data(frame, axes, cans, df):
             ("Movement intensity", "g")]):
         data = df[col]
 
-        f = Frame(frame, pady=1)
-        f.pack(expand=True)
+        frame = Frame(topframe, pady=1)
+        frame.pack(expand=True)
+        frame.place(relheight=0.2, relwidth=1, rely=pos)
+        pos += 0.2
 
-        btn = Button(f, text="Description")
-        btn.pack(side="right")
-
-        #  THHIS SHOULD WORK
-        dropdown = Menu(f, tearoff=0)
-        dropdown.add_command(label='Description')
-
-        def do_popup(event):
-            try:
-                dropdown.tk_popup(event.x_root, event.y_root)
-            finally:
-                dropdown.grab_release()
-
-        btn.bind("<Button-3>", do_popup)
-
-        fig = Figure(figsize=(10, 1))
+        fig = Figure()
         ax = fig.subplots()
-
         axes.append(ax)
 
         topax.set_xlim(df.index[0], df.index[-1])
@@ -81,12 +103,25 @@ def plot_data(frame, axes, cans, df):
         ax.plot(data, color=color)
         topax.plot(data, color=color)
 
-        canvas = FigureCanvasTkAgg(fig, f)
+        title = Label(frame, text=col, width=20, height=5)
+        title.pack(side="left")
+
+        rclickmenu = Menu(topframe, tearoff=0)
+        agg_menu = Menu(rclickmenu, tearoff=0)
+        rclickmenu.add_cascade(label="Aggregation", menu=agg_menu)
+
+        title.bind("<Button-3>", lambda event,
+                   rclickmenu=rclickmenu: do_popup(event, rclickmenu))
+
+        canvas = FigureCanvasTkAgg(fig, frame)
         cans.append(canvas)
         canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         canvas.draw()
 
-    return span
+        setup_aggregation(df, col, ax, canvas, agg_menu, color)
+        buildDescription(root, df, col, rclickmenu)
+
+    return setup_span(topax, axes, cans)
 
 
 def buildFrames(root, tkframes, dataframes):
@@ -107,12 +142,12 @@ def buildFrames(root, tkframes, dataframes):
 
         df = df[~df.index.duplicated(keep='first')]
 
-        # df = df.resample('1H').mean()
+        df = df.resample("1min").mean()
 
         axes[subject_id] = []
         cans[subject_id] = []
 
-        span = plot_data(tkframes[subject_id],
+        span = plot_data(root, tkframes[subject_id],
                          axes[subject_id], cans[subject_id], df)
 
         spans.append(span)

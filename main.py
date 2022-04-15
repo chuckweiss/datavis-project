@@ -27,5 +27,5 @@ filemenu.add_command(label="Open", command=lambda: handle_data(root, menubar))
 menubar.add_cascade(label="Subject")
 
 root.config(menu=menubar)
-root.geometry("1500x800")
+root.geometry("1920x1080")
 root.mainloop()
