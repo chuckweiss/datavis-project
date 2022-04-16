@@ -42,6 +42,7 @@ def setup_aggregation(df, col, ax, canvas, menu, color):
 
         ax.clear()
         ax.plot(data, color=color)
+        ax.set_xlim(df.index[0], df.index[-1])
 
         canvas.draw_idle()
 
@@ -50,7 +51,76 @@ def setup_aggregation(df, col, ax, canvas, menu, color):
             label=sample, command=lambda sample=sample: sample_dataframe(sample))
 
 
-def setup_top(f):
+# def setup_timezone_select(dataframe, col, ax, canvas, rclickmenu, color):
+#     menu = Menu(rclickmenu, tearoff=0)
+#     rclickmenu.add_cascade(label="Timezone", menu=menu)
+
+#     def set_timezone(timezone):
+#         df = dataframe
+
+#         df["Datetime (Local)"] = df.index + \
+#             pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+
+#         if (timezone == "Local"):
+#             df = dataframe.set_index(f'Datetime ({timezone})')
+#             df = df[~df.index.duplicated(keep='first')]
+#             df = df.resample("1min").mean()
+#         data = df[col]
+
+#         ax.clear()
+#         ax.plot(data, color=color)
+#         ax.set_xlim(df.index[0], df.index[-1])
+
+#         canvas.draw_idle()
+
+#     for timezone in ("UTC", "Local"):
+#         menu.add_command(
+#             label=timezone, command=lambda timezone=timezone: set_timezone(timezone))
+
+
+def setup_timezone_select(dataframe, axes, cans, topax, topcanvas, rclickmenu):
+    menu = Menu(rclickmenu, tearoff=0)
+    rclickmenu.add_cascade(label="Timezone", menu=menu)
+
+    def set_timezone(timezone):
+        df = dataframe
+        if (timezone == "Local"):
+            df["Datetime (Local)"] = df.index + \
+                pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+            df = df.set_index("Datetime (Local)", inplace=False)
+            df = df[~df.index.duplicated(keep='first')]
+            df = df.resample("1min").mean()
+
+        topax.clear()
+
+        count = 0
+        for col, color in (
+            [("Acc magnitude avg", "b"),
+                ("Eda avg", "k"),
+                ("Temp avg", "r"),
+                ("Movement intensity", "g")]):
+            data = df[col]
+
+            axes[count].clear()
+            axes[count].plot(data, color=color)
+            axes[count].set_xlim(df.index[0], df.index[-1])
+            topax.plot(data, color=color, alpha=0.5)
+
+            cans[count].draw_idle()
+
+            count += 1
+
+        topax.xaxis.set_ticklabels([])
+        topax.set_xticks([])
+        topax.set_yticks([])
+        topax.set_xlim(df.index[0], df.index[-1])
+        topcanvas.draw_idle()
+
+    menu.add_command(label="UTC", command=lambda: set_timezone("UTC"))
+    menu.add_command(label="Local", command=lambda: set_timezone("Local"))
+
+
+def setup_top(f, df, axes, cans):
     frame = Frame(f, height=1)
     frame.pack(expand=True)
     frame.place(relheight=0.1, relwidth=1, rely=0)
@@ -61,18 +131,26 @@ def setup_top(f):
     ax.xaxis.set_ticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_xlim(df.index[0], df.index[-1])
 
-    Label(frame, text="Viewfinder", width=20, height=5).pack(side="left")
+    label = Label(frame, text="Viewfinder", width=20, height=5)
+    label.pack(side="left")
 
     canvas = FigureCanvasTkAgg(fig, frame)
     canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
     canvas.draw()
 
+    rclickmenu = Menu(frame, tearoff=0)
+    label.bind("<Button-3>", lambda event,
+               rclickmenu=rclickmenu: do_popup(event, rclickmenu))
+
+    setup_timezone_select(df, axes, cans, ax, canvas, rclickmenu)
+
     return (ax, canvas)
 
 
 def plot_data(root, topframe, axes, cans, df):
-    (topax, topcanvas) = setup_top(topframe)
+    (topax, topcanvas) = setup_top(topframe, df, axes, cans)
 
     cans.append(topcanvas)
 
@@ -95,7 +173,7 @@ def plot_data(root, topframe, axes, cans, df):
         ax = fig.subplots()
         axes.append(ax)
 
-        topax.set_xlim(df.index[0], df.index[-1])
+        # topax.set_xlim(df.index[0], df.index[-1])
         ax.set_xlim(df.index[0], df.index[-1])
 
         ax.plot(data, color=color)
@@ -117,6 +195,7 @@ def plot_data(root, topframe, axes, cans, df):
         canvas.draw()
 
         setup_aggregation(df, col, ax, canvas, agg_menu, color)
+        # setup_timezone_select(df, col, ax, canvas, rclickmenu, color)
         buildDescription(root, df, col, rclickmenu)
 
     return setup_span(topax, axes, cans)
@@ -137,8 +216,8 @@ def buildFrames(root, tkframes, dataframes):
         df["Datetime (UTC)"] = pd.to_datetime(
             df["Datetime (UTC)"], utc=True, infer_datetime_format=True)
 
-        df["Datetime (Local)"] = df["Datetime (UTC)"] + \
-            pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+        # df["Datetime (Local)"] = df["Datetime (UTC)"] + \
+        #     pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
 
         # Set index to Datetime in UTC. We need to make a menu item in the top menu
         # next to Subject called Timezone, that will let you switch b/t UTC and Local
