@@ -51,33 +51,6 @@ def setup_aggregation(df, col, ax, canvas, menu, color):
             label=sample, command=lambda sample=sample: sample_dataframe(sample))
 
 
-# def setup_timezone_select(dataframe, col, ax, canvas, rclickmenu, color):
-#     menu = Menu(rclickmenu, tearoff=0)
-#     rclickmenu.add_cascade(label="Timezone", menu=menu)
-
-#     def set_timezone(timezone):
-#         df = dataframe
-
-#         df["Datetime (Local)"] = df.index + \
-#             pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
-
-#         if (timezone == "Local"):
-#             df = dataframe.set_index(f'Datetime ({timezone})')
-#             df = df[~df.index.duplicated(keep='first')]
-#             df = df.resample("1min").mean()
-#         data = df[col]
-
-#         ax.clear()
-#         ax.plot(data, color=color)
-#         ax.set_xlim(df.index[0], df.index[-1])
-
-#         canvas.draw_idle()
-
-#     for timezone in ("UTC", "Local"):
-#         menu.add_command(
-#             label=timezone, command=lambda timezone=timezone: set_timezone(timezone))
-
-
 def setup_timezone_select(dataframe, axes, cans, topax, topcanvas, rclickmenu):
     menu = Menu(rclickmenu, tearoff=0)
     rclickmenu.add_cascade(label="Timezone", menu=menu)
@@ -173,7 +146,6 @@ def plot_data(root, topframe, axes, cans, df):
         ax = fig.subplots()
         axes.append(ax)
 
-        # topax.set_xlim(df.index[0], df.index[-1])
         ax.set_xlim(df.index[0], df.index[-1])
 
         ax.plot(data, color=color)
@@ -195,7 +167,6 @@ def plot_data(root, topframe, axes, cans, df):
         canvas.draw()
 
         setup_aggregation(df, col, ax, canvas, agg_menu, color)
-        # setup_timezone_select(df, col, ax, canvas, rclickmenu, color)
         buildDescription(root, df, col, rclickmenu)
 
     return setup_span(topax, axes, cans)
@@ -215,18 +186,8 @@ def buildFrames(root, tkframes, dataframes):
 
         df["Datetime (UTC)"] = pd.to_datetime(
             df["Datetime (UTC)"], utc=True, infer_datetime_format=True)
-
-        # df["Datetime (Local)"] = df["Datetime (UTC)"] + \
-        #     pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
-
-        # Set index to Datetime in UTC. We need to make a menu item in the top menu
-        # next to Subject called Timezone, that will let you switch b/t UTC and Local
-        # I think it'll be very similar to the aggregation, but you give it
-        # all the axes and canvas' and have it redraw with df index set to Local
         df = df.set_index("Datetime (UTC)", inplace=False)
-
         df = df[~df.index.duplicated(keep='first')]
-
         df = df.resample("1min").mean()
 
         axes[subject_id] = []
