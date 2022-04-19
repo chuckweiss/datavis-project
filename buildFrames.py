@@ -74,7 +74,7 @@ def setup_timezone_select(dataframe, axes, cans, topax,
                 ("Eda avg", "k"),
                 ("Temp avg", "r"),
                 ("Movement intensity", "g"),
-                ("Steps count", "b"),
+                ("Steps count", "orange"),
                 ("Rest", "indigo")]):
             data = df[col]
 
@@ -139,7 +139,7 @@ def plot_data(root, topframe, axes, cans, df, timezone_selection):
             ("Eda avg", "k"),
             ("Temp avg", "r"),
             ("Movement intensity", "g"),
-            ("Steps count", "b"),
+            ("Steps count", "orange"),
             ("Rest", "indigo")]):
         data = df[col]
 
