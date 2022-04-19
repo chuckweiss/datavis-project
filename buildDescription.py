@@ -16,7 +16,7 @@ def create_plot(top, dataframe, col, timezone):
 
     frame = Frame(top, pady=1, padx=1)
     frame.pack()
-    frame.place(relheight=1/3)
+    frame.place(relheight=0.5)
 
     fig = Figure(layout='tight')
 
@@ -34,7 +34,7 @@ def create_plot(top, dataframe, col, timezone):
 
     frame = Frame(top, pady=1, padx=1)
     frame.pack()
-    frame.place(relheight=1/3, rely=1/3)
+    frame.place(relheight=0.5, rely=0.5)
 
     fig = Figure(layout='tight')
 
@@ -49,22 +49,22 @@ def create_plot(top, dataframe, col, timezone):
 
     ###
 
-    df_d = df.groupby(df.index.day).mean()
+    # df_d = df.groupby(df.index.day).mean()
 
-    frame = Frame(top, pady=1, padx=1)
-    frame.pack()
-    frame.place(relheight=1/3, rely=2/3)
+    # frame = Frame(top, pady=1, padx=1)
+    # frame.pack()
+    # frame.place(relheight=1/3, rely=2/3)
 
-    fig = Figure(layout='tight')
+    # fig = Figure(layout='tight')
 
-    ax = fig.subplots()
-    ax.bar(df_d.index, height=df_d[col])
-    ax.set_ylim(ymin=df_d[col].min(), ymax=df_d[col].max())
+    # ax = fig.subplots()
+    # ax.bar(df_d.index, height=df_d[col])
+    # ax.set_ylim(ymin=df_d[col].min(), ymax=df_d[col].max())
 
-    ax.set_title(col + " vs. Day")
+    # ax.set_title(col + " vs. Day")
 
-    canvas = FigureCanvasTkAgg(fig, frame)
-    canvas.get_tk_widget().pack(side='left', fill='both', expand=1)
+    # canvas = FigureCanvasTkAgg(fig, frame)
+    # canvas.get_tk_widget().pack(side='left', fill='both', expand=1)
 
 
 def display_desc(top, dataframe, col, timezone):
