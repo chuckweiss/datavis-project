@@ -73,7 +73,9 @@ def setup_timezone_select(dataframe, axes, cans, topax,
             [("Acc magnitude avg", "b"),
                 ("Eda avg", "k"),
                 ("Temp avg", "r"),
-                ("Movement intensity", "g")]):
+                ("Movement intensity", "g"),
+                ("Steps count", "b"),
+                ("Rest", "indigo")]):
             data = df[col]
 
             axes[count].clear()
@@ -136,14 +138,16 @@ def plot_data(root, topframe, axes, cans, df, timezone_selection):
         [("Acc magnitude avg", "b"),
             ("Eda avg", "k"),
             ("Temp avg", "r"),
-            ("Movement intensity", "g")]):
+            ("Movement intensity", "g"),
+            ("Steps count", "b"),
+            ("Rest", "indigo")]):
         data = df[col]
 
         frame = Frame(topframe, pady=1)
         frame.pack(expand=True)
-        frame.place(relheight=(0.9 / 4), relwidth=1, rely=pos)
+        frame.place(relheight=(0.9 / 6), relwidth=1, rely=pos)
 
-        pos += (0.9 / 4)
+        pos += (0.9 / 6)
 
         fig = Figure(layout='tight')
         ax = fig.subplots()
