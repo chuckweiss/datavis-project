@@ -4,12 +4,12 @@ from subjectSelect import subjectSelect
 from buildFrames import buildFrames
 
 data = []
-
+timezone_selection = {}
 
 def handle_data(root, menubar):
     dataframes = dataSelect()
     tkframes = subjectSelect(root, menubar, dataframes)
-    data.append(buildFrames(root, tkframes, dataframes))
+    data.append(buildFrames(root, tkframes, dataframes, timezone_selection))
 
 
 def build_root():

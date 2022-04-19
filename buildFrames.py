@@ -51,11 +51,13 @@ def setup_aggregation(df, col, ax, canvas, menu, color):
             label=sample, command=lambda sample=sample: sample_dataframe(sample))
 
 
-def setup_timezone_select(dataframe, axes, cans, topax, topcanvas, rclickmenu):
+def setup_timezone_select(dataframe, axes, cans, topax, 
+                          topcanvas, rclickmenu, timezone_selection):
     menu = Menu(rclickmenu, tearoff=0)
     rclickmenu.add_cascade(label="Timezone", menu=menu)
 
     def set_timezone(timezone):
+        timezone_selection["timezone"] = timezone
         df = dataframe
         if (timezone == "Local"):
             df["Datetime (Local)"] = df.index + \
@@ -93,7 +95,7 @@ def setup_timezone_select(dataframe, axes, cans, topax, topcanvas, rclickmenu):
     menu.add_command(label="Local", command=lambda: set_timezone("Local"))
 
 
-def setup_top(f, df, axes, cans):
+def setup_top(f, df, axes, cans, timezone_selection):
     frame = Frame(f, height=1)
     frame.pack(expand=True)
     frame.place(relheight=0.1, relwidth=1, rely=0)
@@ -117,13 +119,14 @@ def setup_top(f, df, axes, cans):
     label.bind("<Button-3>", lambda event,
                rclickmenu=rclickmenu: do_popup(event, rclickmenu))
 
-    setup_timezone_select(df, axes, cans, ax, canvas, rclickmenu)
+    setup_timezone_select(df, axes, cans, ax, canvas, rclickmenu, timezone_selection)
 
     return (ax, canvas)
 
 
-def plot_data(root, topframe, axes, cans, df):
-    (topax, topcanvas) = setup_top(topframe, df, axes, cans)
+def plot_data(root, topframe, axes, cans, df, timezone_selection):
+    (topax, topcanvas) = setup_top(topframe, df, axes, 
+                                   cans, timezone_selection)
 
     cans.append(topcanvas)
 
@@ -167,12 +170,12 @@ def plot_data(root, topframe, axes, cans, df):
         canvas.draw()
 
         setup_aggregation(df, col, ax, canvas, agg_menu, color)
-        buildDescription(root, df, col, rclickmenu)
+        buildDescription(root, df, col, rclickmenu, timezone_selection)
 
     return setup_span(topax, axes, cans)
 
 
-def buildFrames(root, tkframes, dataframes):
+def buildFrames(root, tkframes, dataframes, timezone_selection):
     axes = {}
     cans = {}
     spans = []
@@ -180,6 +183,8 @@ def buildFrames(root, tkframes, dataframes):
     for subject_id in tkframes:
         df = dataframes[subject_id]
         df = df[df["On Wrist"] == True]
+        
+        timezone_selection[subject_id] = { "timezone": "UTC" }
 
         if df.empty:
             continue
@@ -194,7 +199,8 @@ def buildFrames(root, tkframes, dataframes):
         cans[subject_id] = []
 
         span = plot_data(root, tkframes[subject_id],
-                         axes[subject_id], cans[subject_id], df)
+                         axes[subject_id], cans[subject_id], df, 
+                         timezone_selection[subject_id])
 
         spans.append(span)
 

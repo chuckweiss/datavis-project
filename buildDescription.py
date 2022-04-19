@@ -5,7 +5,15 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-def create_plot(top, df, col):
+def create_plot(top, dataframe, col, timezone):
+    df = dataframe
+    if (timezone == "Local"):
+            df["Datetime (Local)"] = df.index + \
+                pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+            df = df.set_index("Datetime (Local)", inplace=False)
+            df = df[~df.index.duplicated(keep='first')]
+            df = df.resample("1min").mean()
+
     frame = Frame(top, pady=1, padx=1)
     frame.pack()
     frame.place(relheight=0.5)
@@ -39,8 +47,8 @@ def create_plot(top, df, col):
     canvas.get_tk_widget().pack(side='left', fill='both', expand=1)
 
 
-def display_desc(top, df, col):
-    df = df[[col]]
+def display_desc(top, dataframe, col, timezone):
+    df = dataframe[[col]]
     desc = df.describe(
         percentiles=[.025, .25, .5, .75, .975, .999], datetime_is_numeric=True)
 
@@ -52,7 +60,7 @@ def display_desc(top, df, col):
     frame = Frame(top)
     frame.pack(side='right', expand=False)
 
-    create_plot(top, df, col)
+    create_plot(top, dataframe, col, timezone)
 
     e = Entry(frame, width=20, fg='black')
     e.grid(row=0, column=1)
@@ -74,11 +82,11 @@ def display_desc(top, df, col):
         count += 1
 
 
-def buildDescription(root, df, col, menu):
+def buildDescription(root, df, col, menu, timezone_selection):
     def open_popup():
         top = Toplevel(root)
         top.geometry("950x650")
         top.title("Description")
-        display_desc(top, df, col)
+        display_desc(top, df, col, timezone_selection["timezone"])
 
     menu.add_command(label="Description", command=open_popup)
