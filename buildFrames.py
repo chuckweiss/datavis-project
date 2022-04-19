@@ -35,14 +35,23 @@ def setup_span(ax, axes, cans):
     )
 
 
-def setup_aggregation(df, col, ax, canvas, menu, color):
+def setup_aggregation(dataframe, col, ax, canvas, menu, color, timezone_selection):
     def sample_dataframe(sample):
+        df = dataframe
+        if (timezone_selection["timezone"] == "Local"):
+            df["Datetime (Local)"] = df.index + \
+                pd.TimedeltaIndex(df["Timezone (minutes)"], unit='min')
+            df = df.set_index("Datetime (Local)", inplace=False)
+            df = df[~df.index.duplicated(keep='first')]
+            df = df.resample("1min").mean()
+
+
         df2 = df.resample(sample).mean()
         data = df2[col]
 
         ax.clear()
+        ax.set_xlim(df2.index[0], df2.index[-1])
         ax.plot(data, color=color)
-        ax.set_xlim(df.index[0], df.index[-1])
 
         canvas.draw_idle()
 
@@ -67,6 +76,10 @@ def setup_timezone_select(dataframe, axes, cans, topax,
             df = df.resample("1min").mean()
 
         topax.clear()
+        topax.xaxis.set_ticklabels([])
+        topax.set_xticks([])
+        topax.set_yticks([])
+        topax.set_xlim(df.index[0], df.index[-1])
 
         count = 0
         for col, color in (
@@ -79,18 +92,15 @@ def setup_timezone_select(dataframe, axes, cans, topax,
             data = df[col]
 
             axes[count].clear()
-            axes[count].plot(data, color=color)
             axes[count].set_xlim(df.index[0], df.index[-1])
+            axes[count].plot(data, color=color)
             topax.plot(data, color=color, alpha=0.5)
-
-            cans[count].draw_idle()
 
             count += 1
 
-        topax.xaxis.set_ticklabels([])
-        topax.set_xticks([])
-        topax.set_yticks([])
-        topax.set_xlim(df.index[0], df.index[-1])
+        for canvas in cans:
+            canvas.draw_idle()
+
         topcanvas.draw_idle()
 
     menu.add_command(label="UTC", command=lambda: set_timezone("UTC"))
@@ -173,7 +183,7 @@ def plot_data(root, topframe, axes, cans, df, timezone_selection):
         canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         canvas.draw()
 
-        setup_aggregation(df, col, ax, canvas, agg_menu, color)
+        setup_aggregation(df, col, ax, canvas, agg_menu, color, timezone_selection)
         buildDescription(root, df, col, rclickmenu, timezone_selection)
 
     return setup_span(topax, axes, cans)
@@ -188,7 +198,10 @@ def buildFrames(root, tkframes, dataframes, timezone_selection):
         df = dataframes[subject_id]
         df = df[df["On Wrist"] == True]
         
-        timezone_selection[subject_id] = { "timezone": "UTC" }
+        timezone_selection[subject_id] = { 
+            "timezone": "UTC",
+            "time_frame": "1min"
+        }
 
         if df.empty:
             continue
